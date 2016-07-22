@@ -138,6 +138,7 @@ Color getColorAt(Vect intersection_position,Vect intersection_ray_direction,vect
      Color winning_object_color=scene_objects.at(index_of_winning_object)->getColor();
      Vect winning_object_normal=scene_objects.at(index_of_winning_object)->getNormalAt(intersection_position);
 //floor color
+/*
 	if (winning_object_color.getCS() == 2) {
 
 
@@ -165,7 +166,7 @@ Color getColorAt(Vect intersection_position,Vect intersection_ray_direction,vect
 		}
 	}
 
-
+*/
 
      Color final_color=winning_object_color.colorscalar(ambientlight);
 
@@ -291,8 +292,8 @@ int main(int argc, char *argv[]){
 	 Vect Y (0,1,0);
 	 Vect Z (0,0,1);
 	 Vect O (0,0,0);
-	 Vect cpos(3,1,-4);
-	 Vect init(0,0,0);
+	 Vect cpos(0,3,-10);
+	 Vect init(0,3,0);
 	 Vect vd (cpos.getVX()-init.getVX(),cpos.getVY()-init.getVY(),cpos.getVZ()-init.getVZ());
 
 	 Vect cdir=vd.negative().normalize();
@@ -305,68 +306,128 @@ int main(int argc, char *argv[]){
 	 //color
 	 Color w_Light(1,1,1,0);      //white light
 	 Color green(0.5,1,0.5,0.1);
-	 Color gray(0.5,0.5,0.5,2);
+	 Color gray(0.5,0.5,0.5,0);
 	 Color black(0,0,0,0);
-	 Color skyBlue(0.6, 0.6, 0.9, 0.2);
-     Color silver(0.75, 0.75, 0.75, 0.2);
-     Color white1(1,1,1,2);
-     Color b(0,0,0,0);
+	 Color skyBlue(0.6, 0.6, 0.9, 0.4);
+     Color silver(0.75, 0.75, 0.75, 0);
+     Color white1(1,1,1,1.5);
+     Color Red(1,0.5,0.5,0);
+     Color green1(0.5,1,0.5,0);
+     Color b(1,0.5,0.5,0);
 
 
 
-
-	 Vect lightpos(-7,18,-10);
-	 Vect lightpos1(7,18,10);
-	 Light scene_light (lightpos,w_Light);
-     Light scene_light1 (lightpos1,w_Light);
-     vector<Source*> light_sources;
-     light_sources.push_back(dynamic_cast<Source*>(&scene_light));
-     light_sources.push_back(dynamic_cast<Source*>(&scene_light1));
+    vector<Source*> light_sources;
+    Vect lightpos[3][2];
+    Light scene_light[3][2];
+     for(int m=0;m<1;m++){
+        for(int n=0;n<1;n++){
+            lightpos[m][n].x=m;
+            lightpos[m][n].y=6;
+            lightpos[m][n].z=n;
+            scene_light[m][n].position=lightpos[m][n];
+            scene_light[m][n].color=w_Light;
+            light_sources.push_back(dynamic_cast<Source*>(&scene_light[m][n]));
+        }
+     }
 
 	 double x1,y1;
 	 //shpere
-	 Sphere sph (Vect(0.5,0,0.5),1,skyBlue);
-	 Sphere sph1 (Vect(0.5,1.125,0.5),0.125,silver);
+	 Sphere sph (Vect(0.0,0,0.0),1,skyBlue);
+
+	 Sphere sph1 (Vect(0.0,1.5,0.0),0.5,silver);
 	 Sphere sph2 (Vect(0.5,0,7),1,green);
 	// Sphere sph2 (O,1,skyBlue);
 //	 Sphere sph (Y,1,green)
-	Plane splane (Y, -1, white1);
+	Plane splane (Y, -1, gray);
+/*	Plane splane1 (Y, 7, black);
+Plane splane2 (X, -4, green1);
+Plane splane3 (X, 4, Red);
+Plane splane4 (Z, -4, gray);
+Plane splane5 (Z, 4, gray);
+Vect AA(0.5,6.9,0.5);
+Vect BB(0.5,6.9,-0.5);
+Vect CC(-0.5,6.9,-0.5);
+Vect DD(-0.5,6.9,0.5);
+Triangle triA(CC,AA,BB,w_Light);
+Triangle triB(DD,AA,CC,w_Light);
+
+*/
+	Vect A(1,-1,-1);
+    Vect B(1,-1,-2);
+	Vect C(1,0,-2);
+    Vect D(1,0,-1);
+	Vect E(0,-1,-1);
+    Vect F(0,-1,-2);
+	Vect G(0,0,-2);
+    Vect H(0,0,-1);
 
 
-	Vect A(0,-1,-1);
-    Vect B(0,-1,-2);
-	Vect C(0,0,-2);
-    Vect D(0,0,-1);
-	Vect E(-1,-1,-1);
-    Vect F(-1,-1,-2);
-	Vect G(-1,-0,-2);
-    Vect H(-1,0,-1);
+    Vect A1(4,-1,4);
+    Vect B1(4,-1,-7);
+	Vect C1(4,7,-7);
+    Vect D1(4,7,4);
+	Vect E1(-4,-1,4);
+    Vect F1(-4,-1,-7);
+	Vect G1(-4,7,-7);
+    Vect H1(-4,7,4);
 
 
 
 
+    A.x-=3;
+    B.x-=3;
+    C.x-=3;
+    D.x-=3;
+    E.x-=3;
+    F.x-=3;
+    G.x-=3;
+    H.x-=3;
 
-	Triangle tri(A,B,C,b);
-	Triangle tri1(A,C,D,b);
-	Triangle tri2(A,D,E,b);
+
+	Triangle tri(A,C,B,b);
+	Triangle tri1(A,D,C,b);
+	Triangle tri2(A,E,D,b);
     Triangle tri3(E,H,D,b);
 
 	Triangle tri4(A,B,E,b);
-	Triangle tri5(F,B,E,b);
+	Triangle tri5(F,E,B,b);
 	Triangle tri6(G,C,B,b);
     Triangle tri7(G,B,F,b);
 
-    Triangle tri8(G,C,H,b);
-	Triangle tri9(D,C,H,b);
+    Triangle tri8(G,H,C,b);
+	Triangle tri9(C,H,D,b);
 	Triangle tri10(G,H,F,b);
     Triangle tri11(E,F,H,b);
 
+    Triangle atri(A1,B1,C1,Red);
+	Triangle atri1(A1,C1,D1,Red);
+	Triangle atri2(A1,D1,E1,gray);
+    Triangle atri3(H1,E1,D1,gray);
+
+	Triangle atri4(A1,E1,B1,gray);
+	Triangle atri5(F1,B1,E1,gray);
+	//Triangle atri6(G1,B1,C1,b);
+    //Triangle atri7(G1,F1,dB1,b);
+
+    Triangle atri8(G1,C1,H1,w_Light);
+	Triangle atri9(C1,H1,D1,white1);
+	Triangle atri10(G1,F1,H1,green1);
+    Triangle atri11(E1,H1,F1,green1);
+
 	 vector<Object*> scene_objects;
+  //   scene_objects.push_back(dynamic_cast<Object*>(&triA));
+//	 scene_objects.push_back(dynamic_cast<Object*>(&triB));
 	 scene_objects.push_back(dynamic_cast<Object*>(&sph));
      scene_objects.push_back(dynamic_cast<Object*>(&sph1));
      scene_objects.push_back(dynamic_cast<Object*>(&sph2));
 
 	 scene_objects.push_back(dynamic_cast<Object*>(&splane));
+     //scene_objects.push_back(dynamic_cast<Object*>(&splane1));
+     //	 scene_objects.push_back(dynamic_cast<Object*>(&splane2));
+    // scene_objects.push_back(dynamic_cast<Object*>(&splane3));
+    // 	 scene_objects.push_back(dynamic_cast<Object*>(&splane4));
+  //   scene_objects.push_back(dynamic_cast<Object*>(&splane5));
      scene_objects.push_back(dynamic_cast<Object*>(&tri));
 	 scene_objects.push_back(dynamic_cast<Object*>(&tri1));
 	 scene_objects.push_back(dynamic_cast<Object*>(&tri2));
@@ -379,6 +440,19 @@ int main(int argc, char *argv[]){
      scene_objects.push_back(dynamic_cast<Object*>(&tri9));
      scene_objects.push_back(dynamic_cast<Object*>(&tri10));
      scene_objects.push_back(dynamic_cast<Object*>(&tri11));
+     //big box
+     scene_objects.push_back(dynamic_cast<Object*>(&atri));
+	 scene_objects.push_back(dynamic_cast<Object*>(&atri1));
+	 scene_objects.push_back(dynamic_cast<Object*>(&atri2));
+     scene_objects.push_back(dynamic_cast<Object*>(&atri3));
+     scene_objects.push_back(dynamic_cast<Object*>(&atri4));
+     scene_objects.push_back(dynamic_cast<Object*>(&atri5));
+//	 scene_objects.push_back(dynamic_cast<Object*>(&atri6));
+//	 scene_objects.push_back(dynamic_cast<Object*>(&atri7));
+//	 scene_objects.push_back(dynamic_cast<Object*>(&atri8));
+     scene_objects.push_back(dynamic_cast<Object*>(&atri9));
+     scene_objects.push_back(dynamic_cast<Object*>(&atri10));
+     scene_objects.push_back(dynamic_cast<Object*>(&atri11));
 	 for(int x=0;x<w;x++){
 
 		 	 for(int y=0;y<h;y++){

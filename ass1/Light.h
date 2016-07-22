@@ -6,11 +6,11 @@
 #include "Color.h"
 
 class Light : public Source {
-	Vect position;
-	Color color;
+
 
 	public:
-
+	Vect position;
+	Color color;
 	Light ();
 
 	Light (Vect, Color);
