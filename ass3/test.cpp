@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include <time.h>
 
+
+
 #include "Vect.h"
 #include "Ray.h"
 #include "Camera.h"
@@ -255,7 +257,23 @@ Color getColorAt(Vect intersection_position,Vect intersection_ray_direction,vect
                     if(specular>0){
 
                         specular=pow(specular,10);
-                        final_color=sqrt(final_color.colorAdd(light_sources.at(i)->getLightColor().colorscalar(specular*winning_object_color.getCS())));
+                        final_color=(final_color.colorAdd(light_sources.at(i)->getLightColor().colorscalar(specular*winning_object_color.getCS())));
+
+                    }
+                }
+                 if(winning_object_color.getCS()==2){
+                    double dot1=winning_object_normal.dotProduct(intersection_ray_direction.negative());
+                    Vect scalar1=winning_object_normal.vectmult(dot1);
+                    Vect add1=scalar1.vectadd(intersection_ray_direction);
+                    Vect scalar2=add1.vectmult(2);
+                    Vect add2=intersection_ray_direction.negative().vectadd(scalar2);
+                    Vect reflection_direction=add2.normalize();
+                    double specular=reflection_direction.dotProduct(light_direction);
+
+                    if(specular>0){
+
+                        specular=pow(specular,10);
+                        final_color=(final_color.colorAdd(light_sources.at(i)->getLightColor().colorscalar(specular*winning_object_color.getCS())));
 
                     }
                 }
@@ -268,6 +286,21 @@ Color getColorAt(Vect intersection_position,Vect intersection_ray_direction,vect
 }
 
 
+
+Vect moving(Vect center,double x1, double y1,double z1){
+    double m[4][4]=
+    {
+        {1,0,0,x1},
+        {0,1,0,y1},
+        {0,0,1,z1},
+        {0,0,0,1},
+    };
+   // printf("%f",(center.getVX()));
+    center=Vect(center.x*m[0][0]+center.y*m[0][1]+center.z*m[0][2]+1*m[0][3],center.x*m[1][0]+center.y*m[1][1]+center.z*m[1][2]+1*m[1][3],center.x*m[2][0]+center.y*m[2][1]+center.z*m[2][2]+1*m[2][3]);
+    printf("%f,%f,%f",center.x,center.y,center.z);
+    return center;
+
+}
 int thisone;
 
 
@@ -277,16 +310,16 @@ int main(int argc, char *argv[]){
 
 
 	 int dpi=72;
-	 int w=640;
-	 int h=480;
-	 double aspect=(double)(w)/(double)h;
-	 int n=w*h;
+	 int width=640;
+	 int height=480;
+	 double aspect=(double)(width)/(double)height;
+	 int n=width*height;
 	 RGBType *pixels= new RGBType[n];
 
      int aadepth=1;
      double aathreshold=0.1;
 
-	 double aspectratio=(double)w/(double)h;
+	 double aspectratio=(double)width/(double)height;
 	 double ambientlight=0.2;
 	 double accuracy=0.000001;
 
@@ -306,7 +339,7 @@ int main(int argc, char *argv[]){
 
 
 	 //color
-	 Color w_Light(1,1,1,0);      //white light
+	 Color w_Light(0.05,0.05,0.05,0);      //white light
 	 Color green(0.5,1,0.5,0.1);
 	 Color gray(0.5,0.5,0.5,0);
 	 Color black(0,0,0,0);
@@ -316,19 +349,16 @@ int main(int argc, char *argv[]){
      Color Red(1,0.5,0.5,0);
      Color green1(0.5,1,0.5,0);
      Color b(1,0.5,0.5,0);
+     Color white2(100,100,100,0);
 
 
-
-    vector<Source*> light_sources;
-    Vect lightpos[3][2];
-    Light scene_light[3][2];
-     for(int m=0;m<1;m++){
-        for(int n=0;n<1;n++){
-            lightpos[m][n].x=m;
-            lightpos[m][n].y=6;
-            lightpos[m][n].z=n;
-            scene_light[m][n].position=lightpos[m][n];
-            scene_light[m][n].color=w_Light;
+	vector<Source*> light_sources;
+    Vect lightpos[5][5];
+    Light scene_light[5][5];
+     for(int m=0;m<5;m++){
+        for(int n=0;n<5;n++){
+            lightpos[m][n]= Vect((m-2.5)/4,6.98,(n-2.5)/4);
+            scene_light[m][n]= Light(lightpos[m][n],w_Light );
             light_sources.push_back(dynamic_cast<Source*>(&scene_light[m][n]));
         }
      }
@@ -337,13 +367,13 @@ int main(int argc, char *argv[]){
 	 //shpere
 	 Sphere sph (Vect(0.0,0,0.0),1,skyBlue);
 
-	 Sphere sph1 (Vect(0.0,1.5,0.0),0.5,silver);
+	 Sphere sph1 (moving(O,0,1.5,0),0.5,silver);
 	 Sphere sph2 (Vect(0.5,0,7),1,green);
 	// Sphere sph2 (O,1,skyBlue);
 //	 Sphere sph (Y,1,green)
 	Plane splane (Y, -1, gray);
 /*	Plane splane1 (Y, 7, black);
-Plane splane2 (X, -4, green1);
+Plane splane2 (X, -4, green1    );
 Plane splane3 (X, 4, Red);
 Plane splane4 (Z, -4, gray);
 Plane splane5 (Z, 4, gray);
@@ -374,8 +404,10 @@ Triangle triB(DD,AA,CC,w_Light);
 	Vect G1(-4,7,-7);
     Vect H1(-4,7,4);
 
-
-
+	Vect C2(2.5/4,6.9999,-2.5/4);
+    Vect D2(2.5/4,6.9999,2.5/4);
+	Vect G2(-2.5/4,6.9999,-2.5/4);
+    Vect H2(-2.5/4,6.9999,2.5/4);
 
     A.x-=3;
     B.x-=3;
@@ -412,11 +444,13 @@ Triangle triB(DD,AA,CC,w_Light);
 	//Triangle atri6(G1,B1,C1,b);
     //Triangle atri7(G1,F1,dB1,b);
 
-    Triangle atri8(G1,C1,H1,w_Light);
+    Triangle atri8(H1,C1,G1,white1);
 	Triangle atri9(C1,H1,D1,white1);
 	Triangle atri10(G1,F1,H1,green1);
     Triangle atri11(E1,H1,F1,green1);
 
+    Triangle L8(C2,H2,G2,white2);
+	Triangle L9(H2,C2,D2,white2);
 	 vector<Object*> scene_objects;
   //   scene_objects.push_back(dynamic_cast<Object*>(&triA));
 //	 scene_objects.push_back(dynamic_cast<Object*>(&triB));
@@ -451,110 +485,110 @@ Triangle triB(DD,AA,CC,w_Light);
      scene_objects.push_back(dynamic_cast<Object*>(&atri5));
 //	 scene_objects.push_back(dynamic_cast<Object*>(&atri6));
 //	 scene_objects.push_back(dynamic_cast<Object*>(&atri7));
-//	 scene_objects.push_back(dynamic_cast<Object*>(&atri8));
+	 scene_objects.push_back(dynamic_cast<Object*>(&atri8));
      scene_objects.push_back(dynamic_cast<Object*>(&atri9));
      scene_objects.push_back(dynamic_cast<Object*>(&atri10));
      scene_objects.push_back(dynamic_cast<Object*>(&atri11));
+	 scene_objects.push_back(dynamic_cast<Object*>(&L8));
+     scene_objects.push_back(dynamic_cast<Object*>(&L9));
+	int thisone, aa_index;
+	double xamnt, yamnt;
+	double tempRed, tempGreen, tempBlue;
 
-     int thisone,aa_index;
-     double tempRed,tempBlue,tempGreen;
+	for (int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
+			thisone = y*width + x;
 
-	 for(int x=0;x<w;x++){
+			// start with a blank pixel
+			double tempRed[aadepth*aadepth];
+			double tempGreen[aadepth*aadepth];
+			double tempBlue[aadepth*aadepth];
 
-		 	 for(int y=0;y<h;y++){
+			for (int aax = 0; aax < aadepth; aax++) {
+				for (int aay = 0; aay < aadepth; aay++) {
 
-		        thisone=y*w+x;
+					aa_index = aay*aadepth + aax;
 
+					srand(time(0));
 
-		        //start with a block pixel
-		        double tempRed[aadepth*aadepth];
-		        double tempGreen[aadepth*aadepth];
-		        double tempBlue[aadepth*aadepth];
+					// create the ray from the camera to this pixel
+					if (aadepth == 1) {
 
-		        for(int aax=0;aax<aadepth;aax++){
-                    for(int aay=0;aay<aadepth;aay++){
-                        aa_index=aay*aadepth+aax;
-                        srand(time(0));
-                        //create the ray from camera
+						// start with no anti-aliasing
+						if (width > height) {
+							// the image is wider than it is tall
+							xamnt = ((x+0.5)/width)*aspectratio - (((width-height)/(double)height)/2);
+							yamnt = ((height - y) + 0.5)/height;
+						}
+						else if (height > width) {
+							// the imager is taller than it is wide
+							xamnt = (x + 0.5)/ width;
+							yamnt = (((height - y) + 0.5)/height)/aspectratio - (((height - width)/(double)width)/2);
+						}
+						else {
+							// the image is square
+							xamnt = (x + 0.5)/width;
+							yamnt = ((height - y) + 0.5)/height;
+						}
+					}
+					else {
+						// anti-aliasing
+						if (width > height) {
+							// the image is wider than it is tall
+							xamnt = ((x + (double)aax/((double)aadepth - 1))/width)*aspectratio - (((width-height)/(double)height)/2);
+							yamnt = ((height - y) + (double)aax/((double)aadepth - 1))/height;
+						}
+						else if (height > width) {
+							// the imager is taller than it is wide
+							xamnt = (x + (double)aax/((double)aadepth - 1))/ width;
+							yamnt = (((height - y) + (double)aax/((double)aadepth - 1))/height)/aspectratio - (((height - width)/(double)width)/2);
+						}
+						else {
+							// the image is square
+							xamnt = (x + (double)aax/((double)aadepth - 1))/width;
+							yamnt = ((height - y) + (double)aax/((double)aadepth - 1))/height;
+						}
+					}
 
-            if(aadepth==1){
+					Vect cam_ray_origin = cam.getCP();
+					Vect cam_ray_direction = cdir.vectadd(cright.vectmult(xamnt - 0.5).vectadd(cdown.vectmult(yamnt - 0.5))).normalize();
 
+					Ray cam_ray (cam_ray_origin, cam_ray_direction);
 
+					vector<double> intersections;
 
-				//no anti-aliasing
-				if(w>h){//wider
-					x1=((x+0.5)/w)*aspect-((w-h)/(double)h)/2;
-					y1=((h-y)+0.5)/h;
+					for (int index = 0; index < scene_objects.size(); index++) {
+						intersections.push_back(scene_objects.at(index)->findIntersection(cam_ray));
+					}
+
+					int index_of_winning_object = winningObjectIndex(intersections);
+
+					if (index_of_winning_object == -1) {
+						// set the backgroung black
+						tempRed[aa_index] = 0;
+						tempGreen[aa_index] = 0;
+						tempBlue[aa_index] = 0;
+					}
+					else{
+						// index coresponds to an object in our scene
+						if (intersections.at(index_of_winning_object) > accuracy) {
+							// determine the position and direction vectors at the point of intersection
+
+							Vect intersection_position = cam_ray_origin.vectadd(cam_ray_direction.vectmult(intersections.at(index_of_winning_object)));
+							Vect intersecting_ray_direction = cam_ray_direction;
+
+							Color intersection_color = getColorAt(intersection_position, intersecting_ray_direction, scene_objects, index_of_winning_object, light_sources, accuracy, ambientlight);
+
+							tempRed[aa_index] = intersection_color.getCR();
+							tempGreen[aa_index] = intersection_color.getCG();
+							tempBlue[aa_index] = intersection_color.getCB();
+						}
+					}
 				}
-				else if (h>w){
-					x1=(x+0.5)/w;
-					y1= ((h-y+0.5)/h)/aspect-((h-w)/(double)w)/2;
+			}
 
-
-				}else{
-
-					x1=(x+0.5)/w;
-					y1=(h-y+0.5)/h;
-				}
-            }else{
-                       //anti=alisasing
-                if(w>h){//wider
-					x1=((x+(double)aax/((double)aadepth-1))/w)*aspect-((w-h)/(double)h)/2;
-					y1=((h-y)+(double)aax/((double)aadepth-1))/h;
-				}
-				else if (h>w){
-					x1=(x+(double)aax/((double)aadepth-1))/w;
-					y1= ((h-y+(double)aax/((double)aadepth-1))/h)/aspect-((h-w)/(double)w)/2;
-
-
-				}else{
-
-					x1=(x+(double)aax/((double)aadepth-1))/w;
-					y1=(h-y+(double)aax/((double)aadepth-1))/h;
-				}
-                    }
-				Vect cam_ray_ori=cam.getCP();
-				Vect cam_ray_dir=cdir.vectadd(cright.vectmult(x1-0.5).vectadd(cdown.vectmult(y1-0.5))).normalize();
-
-				Ray cam_ray (cam_ray_ori,cam_ray_dir);
-
-				vector<double> intersections;
-
-				for(int i=0;i<scene_objects.size();i++){
-					intersections.push_back(scene_objects.at(i)->findIntersection(cam_ray));
-
-
-				}
-                int  index_of_winning_object=winningObjectIndex(intersections);
-              //  cout<<index_of_winning_object;
-
-
-
-			 if(index_of_winning_object==-1){
-		        tempRed[aa_index]=0;
-                tempGreen[aa_index]=0;
-				tempBlue[aa_index]=0;
-				}else{
-                //index of an object
-                if(intersections.at(index_of_winning_object)>accuracy){
-                    Vect intersection_position=cam_ray_ori.vectadd(cam_ray_dir.vectmult(intersections.at(index_of_winning_object)));
-                    Vect intersection_ray_direction=cam_ray_dir;
-
-
-
-                Color intersection_color=getColorAt(intersection_position,intersection_ray_direction,scene_objects,index_of_winning_object,light_sources,accuracy,ambientlight);
- 		        tempRed[aa_index]=intersection_color.getCR();
-				tempGreen[aa_index]=intersection_color.getCG();
-				tempBlue[aa_index]=intersection_color.getCB();
-                }
-				}
-
-
-                }
-
-
-            }
-            			double totalRed = 0;
+			// average the pixel color
+			double totalRed = 0;
 			double totalGreen = 0;
 			double totalBlue = 0;
 
@@ -575,9 +609,9 @@ Triangle triB(DD,AA,CC,w_Light);
 			pixels[thisone].r = avgRed;
 			pixels[thisone].g = avgGreen;
 			pixels[thisone].b = avgBlue;
-        }
-}
-	 savebmp("s.bmp",w,h,dpi,pixels);
+		}
+	}
+	 savebmp("s1.bmp",width,height,dpi,pixels);
 	 	delete pixels, tempRed, tempGreen, tempBlue;
 	 return 0;
 }
